@@ -1,0 +1,117 @@
+syntax="proto3";
+
+package OrionCommunication;
+
+/*
+        - all coordinates are in normalized points (0 -1 )
+        - we only support one ROI
+*/
+
+service AppConfig {
+    rpc SetPanaromaParameters(PanoramaPars) returns(AppCommandResult) {}
+    rpc GetPanaromaParameters(DummyInfo) returns(PanoramaPars) {}
+
+    rpc SetMotionDetectionParameters(TRoi) returns(AppCommandResult) {}
+    rpc GetMotionDetectionParameters(DummyInfo) returns(TRoi) {}
+
+    rpc SetCurrentMode(SetModeQ) returns(AppCommandResult) {
+        option deprecated = true;
+    }
+    rpc GetCurrentMode(DummyInfo) returns(SetModeQ) {
+        option deprecated = true;
+    }
+
+    rpc SetSensivityParameter(SetSensivity) returns(AppCommandResult) {}
+    rpc GetSensivityParameter(DummyInfo) returns(SetSensivity) {}
+    rpc GetLastPanaromaFrame(DummyInfo) returns(AppCommandResult) {}
+    rpc GetPanaromaFrames(GetFrames) returns(stream PanoramaFrame) {}
+
+    rpc RunMotion(DummyInfo) returns(AppCommandResult) {}
+    rpc RunPanaroma(DummyInfo) returns(AppCommandResult) {}
+    rpc StopMotion(DummyInfo) returns(AppCommandResult) {}
+    rpc StopPanaroma(DummyInfo) returns(AppCommandResult) {}
+
+    rpc GetMainScreenShot(DummyInfo) returns(ScreenFrame) {}
+    rpc GetSecScreenShot(DummyInfo) returns(ScreenFrame) {}
+    rpc GotoPanaromaPixel(TPoint) returns(AppCommandResult) {}
+    rpc CurrentPanaromaPixel(DummyInfo) returns(TPoint) {}
+}
+
+message PanoramaPars {
+    int32 pos = 1;
+    int32 fov = 2;
+    float update_rate = 3;
+    float pan_start_angle = 4;
+    int32 y_start_pos = 5;
+    int32 widthx = 6;
+    int32 heighty = 7;
+    int32 fix_mode = 8;
+    int32 pan_motion_frame_no = 9;
+}
+
+message TRoi {
+    repeated TPolygon polygon = 1;
+    TRectangle rect1 = 2;
+    TRectangle rect2 = 3;
+}
+
+message TPoint{
+    float x = 1;
+    float y = 2;
+}
+
+message TPolygon {
+    repeated TPoint points = 1;
+    bool is_active = 2;
+}
+
+message TRectangle {
+    TPoint upperLeft = 1;
+    TPoint bottomRight = 2;
+}
+
+message SetModeQ {
+    enum Mode {
+      NONE = 0;
+      PANAROMA = 1;
+      MOTION_DETECTION = 2;
+    }
+    Mode mode = 1;
+}
+
+message DummyInfo {
+    int32 dummy = 1;
+}
+
+message MotionDetectionParameters {
+    int32 dummy = 1;
+}
+
+message AppCommandResult {
+    int32 err = 1;
+}
+
+message AryaParameters {
+    int32 panSpeed = 1;
+}
+
+message GetFrames {
+    enum Frames {
+      LastFrame = 0;
+      AllFrames = 1;
+    }
+    Frames modeFrame = 1;
+}
+
+message PanoramaFrame {
+    bool valid = 1;
+    float progress = 2;
+    bytes frameData = 3;
+}
+message ScreenFrame {
+    bytes frame = 1;
+}
+
+message SetSensivity {
+    int32 sensivity = 1;
+}
