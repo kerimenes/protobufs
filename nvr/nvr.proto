@@ -1,0 +1,220 @@
+syntax = "proto3";
+
+package LmmNvr;
+
+import "nvrdb.proto";
+import "google/protobuf/empty.proto";
+
+service NvrService {
+	rpc GetNvrInfo (google.protobuf.Empty) returns (NvrGeneralInfo) {}
+	rpc GetNvrHealth (google.protobuf.Empty) returns (NvrHealthInfo) {}
+	rpc GetCameraList(CameraFilters) returns (CameraList) {}
+	rpc GetCameraStatus(CameraQ) returns (CameraStatus) {}
+	rpc GetCameraInfo(CameraQ) returns (CameraInfo) {}
+	rpc GetCameraRecordInfo(CameraQ) returns (RecordInfo) {}
+	rpc GetCameraStream(CameraStreamQ) returns (stream StreamFrame) {}
+
+	rpc AddCamera(CameraInfo) returns (CameraInfo) {}
+	rpc DelCamera(CameraQ) returns (CameraInfo) {}
+	rpc SetCameraInfo(CameraInfo) returns (CameraInfo) {}
+	rpc RecordCamera(CameraQ) returns (CameraStatus) {}
+	rpc ReleaseCamera(CameraQ) returns (CameraStatus) {}
+
+	rpc DiscoverCameras(DiscoveryQ) returns (CameraList) {}
+}
+
+service AlarmService {
+	rpc GetAlarmSources(google.protobuf.Empty) returns (AlarmSources) {}
+	rpc GetAlarmStatus(AlarmSourceQ) returns (AlarmInfo) {}
+	rpc EnableAlarmSource(AlarmSourceQ) returns (AlarmInfo) {}
+	rpc DisableAlarmSource(AlarmSourceQ) returns (AlarmInfo) {}
+	rpc PollAlarmSource(AlarmSourceQ) returns (stream AlarmInfo) {}
+	rpc RegisterAlarmEndpoint(AlarmEndpointQ) returns (AlarmInfo) {}
+	rpc RemoveAlarmEndpoint(AlarmEndpointQ) returns (AlarmInfo) {}
+	rpc TriggerAlarm(AlarmSourceQ) returns (google.protobuf.Empty) {}
+}
+
+message WIFIIntefaceInfo {
+	int64 download_rate = 1;
+	int64 upload_rate = 2;
+	int32 wifi_mode = 3;
+}
+
+message LTEInterfaceInfo {
+	int64 download_rate = 1;
+	int64 upload_rate = 2;
+	int32 pin_status = 3;
+}
+
+message EthernetInterfaceInfo {
+	int64 download_rate = 1;
+	int64 upload_rate = 2;
+	int32 cable_status = 3;
+}
+
+message NvrHealthInfo {
+	int32 cpu_load = 1;
+	int64 free_mem = 2;
+	int64 free_storage = 3;
+	repeated LTEInterfaceInfo lte_info = 4;
+	repeated WIFIIntefaceInfo wifi_info = 5;
+	repeated EthernetInterfaceInfo eth_info = 6;
+	int32 battery_mode = 7;
+	int32 battery_cap = 8;
+}
+
+message AlarmSourceQ {
+	string source_id = 1;
+}
+
+message AlarmEndpointQ {
+	string source_id = 1;
+	enum EndpointType {
+		TCP = 0;
+		UDP = 1;
+		HTTP_POST = 2;
+		SOAP = 3;
+		FTP = 4;
+	}
+	EndpointType eptype = 2;
+	string ep_address = 3;
+	int32 ep_port = 4;
+};
+
+message AlarmSource {
+	string source_id = 1;
+	enum AlarmSourceType {
+		UNKNOWN = 0;
+		GPIO = 1;
+		VIDEO_ANALYTICS = 2;
+		NVR_AI = 3;
+		EXTERNAL_TRIGGER = 4;
+		CAMERA = 5;
+	}
+	AlarmSourceType source = 2;
+	bool enabled = 3;
+}
+
+message AlarmInfo {
+	AlarmSource source = 1;
+	bool alarm_on = 2;
+}
+
+message AlarmSources {
+	repeated AlarmSource sources = 1;
+}
+
+message CameraFilters {
+	enum Filter {
+		NONE = 0x00;
+		DISABLED = 0x01;
+		NONRECORDING = 0x02;
+	}
+	Filter filter_out = 1;
+}
+
+message NvrGeneralInfo {
+	int32 version_major = 1;
+	int32 version_minor = 2;
+	int32 version_patch = 3;
+	string version_string = 4;
+}
+
+message CameraStatus {
+	enum RecordingState {
+		RECORDING = 0;
+		DISABLED = 1;
+		NOTRECORDING = 2;
+	}
+	enum VideoConnectionInfo {
+		NO_PING = 0;
+		NO_RTSP = 1;
+		NO_RTP = 2;
+		NO_VIDEO = 3;
+		GARBAGE_VIDEO = 4;
+		VIDEO_VALID = 5;
+	}
+	RecordingState record_status = 1;
+	float camera_health = 2;
+	int32 instant_bitrate = 3;
+	VideoConnectionInfo video_status = 4;
+}
+
+message CameraList {
+	repeated CameraInfo list = 1;
+}
+
+message DiscoveryQ {
+	enum DiscoveryType {
+		UPNP = 0;
+		MAC = 1;
+		ZEROCONF = 2;
+		LAN = 3;
+		CUSTOM = 4;
+	}
+	DiscoveryType type = 1;
+};
+
+message CameraQ {
+	string unique_id = 1;
+	string ip_address = 2;
+}
+
+message CameraStream {
+	enum MediaType {
+		MEDIA_VIDEO = 0;
+		MEDIA_AUDIO = 1;
+		MEDIA_METADATA = 2;
+	}
+	enum CodecType {
+		CODEC_H264 = 0;
+		CODEC_H265 = 1;
+	}
+	enum ResolutionProfile {
+		R_BEST = 0;
+		R_HIGH = 1;
+		R_MEDIUM = 2;
+		R_LOW = 3;
+		R_LOWEST = 4;
+		R_CUSTOM = 5;
+	}
+	enum QualityProfile {
+		Q_BEST = 0;
+		Q_HIGH = 1;
+		Q_MEDIUM = 2;
+		Q_LOW = 3;
+		Q_LOWEST = 4;
+		Q_AUTO_WIFI = 5;
+		Q_AUTO_LTE = 6;
+		Q_AUTO_3G = 7;
+	}
+	MediaType media = 1;
+	CodecType codec = 2;
+	QualityProfile qprofile = 3;
+	ResolutionProfile rprofile = 4;
+	int32 frame_rate = 5;
+}
+
+message CameraStreamQ {
+	string unique_id = 1;
+	repeated CameraStream streams = 2;
+}
+
+message StreamBuffer {
+	bytes data = 1;
+	string md5 = 2;
+	bool chunked = 3;
+	int32 flags = 4;
+}
+
+message StreamFrame {
+	repeated CameraStream info = 1;
+	repeated StreamBuffer data = 2;
+}
+
+message RecordInfo {
+	string record_id = 1;
+	string camera_id = 2;
+	string record_path = 3;
+	int64 total_size = 4;
+}
