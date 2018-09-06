@@ -13,6 +13,7 @@ service NvrService {
 	rpc GetCameraInfo(CameraQ) returns (CameraInfo) {}
 	rpc GetCameraRecordInfo(CameraQ) returns (RecordInfo) {}
 	rpc GetCameraStream(CameraStreamQ) returns (stream StreamFrame) {}
+	rpc GetGPSData(google.protobuf.Empty) returns (GPSDataInfo) {}
 
 	rpc AddCamera(CameraInfo) returns (CameraInfo) {}
 	rpc DelCamera(CameraQ) returns (CameraInfo) {}
@@ -32,6 +33,13 @@ service AlarmService {
 	rpc RegisterAlarmEndpoint(AlarmEndpointQ) returns (AlarmInfo) {}
 	rpc RemoveAlarmEndpoint(AlarmEndpointQ) returns (AlarmInfo) {}
 	rpc TriggerAlarm(AlarmSourceQ) returns (google.protobuf.Empty) {}
+}
+
+message GPSDataInfo {
+	double gps_lat = 1;
+	double gps_long = 2;
+	string gps_date = 3;
+	string gps_time = 4;
 }
 
 message WIFIIntefaceInfo {
