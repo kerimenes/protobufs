@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package LmmNvr;
+
+message NvrDb {
+        NvrSettings settings = 1;
+        NvrConfig config = 2;
+}
+
+message NvrSettings {
+        string defaultRecordStream = 1;
+        string objectName = 2;
+        bool playLiveVideoByDefault = 3;
+        string primaryStorage = 4;
+        bool recordingEnabled = 5;
+        bool headlessOperation = 6;
+        bool autoAttachLiveStreamers = 7;
+        string pcapInterfaceForRtpStats = 8;
+}
+
+message CameraInfo {
+        string ip_address = 1;
+        string model = 2;
+        string unique_id = 3;
+        string rtsp_main_stream = 4;
+        string rtsp_sec_stream = 5;
+        bool enabled = 6;
+        string recordStream = 7;
+		int32 rtsp_port = 8;
+}
+
+message NvrConfig {
+        repeated CameraInfo active_cameras = 1;
+}
